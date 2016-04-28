@@ -82,16 +82,22 @@ namespace karel {
 
 		size_type max_size() const { return size_type(UINT_MAX / sizeof(T)); }
 	};
-};
+}
 
 
 // for test...
+// karel::allocator above can't be applied to vector as a class parameter
+
 #include <vector>
-using namespace std;
+#include <iterator>
 
 int main()
 {
 	int a[5] = { 1,2,3,4,5 };
-	vector<int, karel::allocator<int>> v(a, a + 5);
+	std::vector<int, karel::allocator<int>> v(a, a + 5);
+	std::ostream_iterator<int> out_it(std::cout, ", ");
+	std::copy(v.begin(), v.end(), out_it);
 
+	system("pause");
+	return 0;
 }
