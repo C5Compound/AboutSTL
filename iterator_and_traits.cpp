@@ -72,3 +72,10 @@ namespace karel {
 		std::cout << "random_access_iterator_tag !" << endl;
 	}
 }
+
+// for test
+int main()
+{
+	system("pause");
+	return 0;
+}
