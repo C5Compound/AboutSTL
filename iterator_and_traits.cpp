@@ -13,11 +13,12 @@
 
 namespace karel {
 
-	struct input_iterator_tag {};
-	struct output_iterator_tag {};
-	struct forward_iterator_tag : public input_iterator_tag {};
-	struct bidirectional_iterator_tag : public forward_iterator_tag {};
-	struct random_access_iterator_tag : public bidirectional_iterator_tag {};
+	//struct input_iterator_tag {};
+	//struct output_iterator_tag {};
+	//struct forward_iterator_tag : public input_iterator_tag {};
+	//struct bidirectional_iterator_tag : public forward_iterator_tag {};
+	//struct random_access_iterator_tag : public bidirectional_iterator_tag {};
+	struct random_access_iterator_tag {};
 
 	template <class Category, class T, class Distance = ptrdiff_t,
 			  class Pointer = T*, class Reference = T&>
@@ -31,7 +32,9 @@ namespace karel {
 
 	template <class Iterator>
 	struct iterator_traits {
-		typedef typename Iterator::iterator_category	iterator_category;
+		// typedef typename Iterator::iterator_category	iterator_category;
+		// test if VC vector iterator is T*
+		typedef typename karel::random_access_iterator_tag		iterator_category;
 		typedef typename Iterator::value_type			value_type;
 		typedef typename Iterator::difference_type		difference_type;
 		typedef typename Iterator::pointer				pointer;
@@ -41,7 +44,7 @@ namespace karel {
 	// template partial specialization
 	template <class T>
 	struct iterator_traits <T*> {
-		typedef typename random_access_iterator_tag		iterator_category;
+		typedef typename std::random_access_iterator_tag		iterator_category;
 		typedef typename T								value_type;
 		typedef typename ptrdiff_t						difference_type;
 		typedef typename T*								pointer;
@@ -50,7 +53,7 @@ namespace karel {
 
 	template <class T>
 	struct iterator_traits <const T*> {
-		typedef typename random_access_iterator_tag		iterator_category;
+		typedef typename std::random_access_iterator_tag		iterator_category;
 		typedef typename const T						value_type;
 		typedef typename ptrdiff_t						difference_type;
 		typedef typename const T*						pointer;
@@ -58,24 +61,42 @@ namespace karel {
 	};
 
 	template <class InputIterator>
-	inline iterator_traits<InputIterator>::difference_type distance(InputIterator first, InputIterator last) {
-		__distance(first, last, iterator_traits<InputIterator>::iterator_category());
+	inline typename iterator_traits<InputIterator>::difference_type distance(InputIterator first, InputIterator last) {
+		typedef typename iterator_traits<InputIterator>::iterator_category category;
+		return __distance(first, last, category());
 	}
 
 	template <class InputIterator>
-	inline iterator_traits<InputIterator>::difference_type __distance(InputIterator first, InputIterator last, input_iterator_tag) {
-		std::cout << "input_iterator_tag !" << endl;
+	inline typename iterator_traits<InputIterator>::difference_type __distance(InputIterator first, InputIterator last, std::input_iterator_tag) {
+		std::cout << "input_iterator_tag !" << std::endl;
+		return static_cast<typename iterator_traits<InputIterator>::difference_type>(0);
 	}
 
 	template <class InputIterator>
-	inline iterator_traits<InputIterator>::difference_type __distance(InputIterator first, InputIterator last, random_access_iterator_tag) {
-		std::cout << "random_access_iterator_tag !" << endl;
+	inline typename iterator_traits<InputIterator>::difference_type __distance(InputIterator first, InputIterator last, std::random_access_iterator_tag) {
+		std::cout << "random_access_iterator_tag !" << std::endl;
+		return static_cast<typename iterator_traits<InputIterator>::difference_type>(0);
 	}
+
+	template <class InputIterator>
+	inline typename iterator_traits<InputIterator>::difference_type __distance(InputIterator first, InputIterator last, karel::random_access_iterator_tag) {
+		std::cout << "VC vector iterator implementation is not T*!" << std::endl;
+		return static_cast<typename iterator_traits<InputIterator>::difference_type>(0);
+	}
+	
+	// __type_traits
 }
 
-// for test
+// for test...
+#include <vector>
+
 int main()
 {
+	std::vector<int> v;
+	karel::distance(v.begin(), v.end());	// traits iterator category tag from std vector
+	int a[5] = { 0,1,2,3,4 };
+	karel::distance(a, a + 5);				// test how iterator_traits act when a pointer is passed as a parameter
+
 	system("pause");
 	return 0;
 }
